@@ -74,22 +74,22 @@ class ModelTestCase(RediscoTestCase):
         self.assertEqual([('first_name', 'required')], person.errors)
 
     def test_unicode(self):
-        p = Person(first_name=u"Niña", last_name="Jose")
-        self.assert_(p.save())
+        p = Person(first_name="Niña", last_name="Jose")
+        self.assertTrue(p.save())
         g = Person.objects.create(first_name="Granny", last_name="Goose")
-        self.assert_(g)
+        self.assertTrue(g)
 
-        p = Person.objects.filter(first_name=u"Niña").first()
-        self.assert_(p)
-        self.assert_(isinstance(p.full_name(), unicode))
-        self.assertEqual(u"Niña Jose", p.full_name())
+        p = Person.objects.filter(first_name="Niña").first()
+        self.assertTrue(p)
+        self.assertTrue(isinstance(p.full_name(), str))
+        self.assertEqual("Niña Jose", p.full_name())
 
     def test_repr(self):
         person1 = Person(first_name="Granny", last_name="Goose")
         self.assertEqual("<Person {'active': False, 'first_name': 'Granny', 'last_name': 'Goose'}>",
                 repr(person1))
 
-        self.assert_(person1.save())
+        self.assertTrue(person1.save())
         self.assertEqual("<Person:1 {'active': False, 'first_name': 'Granny', 'last_name': 'Goose', 'id': '1'}>",
                 repr(person1))
 
@@ -494,11 +494,11 @@ class ModelTestCase(RediscoTestCase):
             student_id = models.CharField(unique=True)
 
         student = Student.objects.create(student_id="042231")
-        self.assert_(student)
+        self.assertTrue(student)
 
         student = Student(student_id="042231")
         self.assertFalse(student.is_valid())
-        self.assert_(('student_id', 'not unique') in student.errors)
+        self.assertTrue(('student_id', 'not unique') in student.errors)
 
         student = Student()
         self.assertTrue(student.is_valid())
@@ -507,7 +507,7 @@ class ModelTestCase(RediscoTestCase):
         class Tweet(models.Model):
             status_id = models.IntegerField()
 
-        t = Tweet(status_id=int(u'14782201061'))
+        t = Tweet(status_id=int('14782201061'))
         self.assertTrue(t.is_valid())
         t.save()
 
@@ -569,10 +569,10 @@ class ModelTestCase(RediscoTestCase):
                 key = 'People'
 
         p = Person(name="Clark Kent")
-        self.assert_(p.is_valid())
-        self.assert_(p.save())
+        self.assertTrue(p.is_valid())
+        self.assertTrue(p.save())
 
-        self.assert_('1' in self.client.smembers('People:all'))
+        self.assertTrue('1' in self.client.smembers('People:all'))
 
 
 class Event(models.Model):
@@ -635,7 +635,7 @@ class CharFieldTestCase(RediscoTestCase):
         p = Person(name='The quick brown fox jumps over the lazy dog.')
 
         self.assertFalse(p.is_valid())
-        self.assert_(('name', 'exceeds max length') in p.errors)
+        self.assertTrue(('name', 'exceeds max length') in p.errors)
 
 
 class Student(models.Model):
@@ -941,7 +941,7 @@ class CounterFieldTestCase(RediscoTestCase):
 
         post = Post.objects.create(title="First!",
                 body="Lorem ipsum")
-        self.assert_(post)
+        self.assertTrue(post)
         post.incr('liked')
         post.incr('liked', 2)
         post = Post.objects.get_by_id(post.id)
@@ -977,9 +977,9 @@ class MutexTestCase(RediscoTestCase):
         t2.start()
         t1.join()
         t2.join()
-        self.assert_(time2['time'] > time1['time'])
+        self.assertTrue(time2['time'] > time1['time'])
 
     def test_lock_expired(self):
         Mutex(self.p1).lock()
         with Mutex(self.p2):
-            self.assert_(True)
+            self.assertTrue(True)

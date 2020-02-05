@@ -149,9 +149,9 @@ class SetTestCase(unittest.TestCase):
         self.assertRaises(ValueError, abc.difference, new_set, def_)
         self.assertRaises(ValueError, abc.intersection, new_set, def_)
 
-        self.assert_(isinstance(abc.union('new_set', def_), cont.Set))
-        self.assert_(isinstance(abc.intersection('new_set', def_), cont.Set))
-        self.assert_(isinstance(abc.difference('new_set', def_), cont.Set))
+        self.assertTrue(isinstance(abc.union('new_set', def_), cont.Set))
+        self.assertTrue(isinstance(abc.intersection('new_set', def_), cont.Set))
+        self.assertTrue(isinstance(abc.difference('new_set', def_), cont.Set))
 
 
     def test_access_redis_methods(self):
@@ -161,14 +161,14 @@ class SetTestCase(unittest.TestCase):
         s.srem('b')
         self.assertEqual('a', s.spop())
         s.sadd('a')
-        self.assert_('a' in s.members)
+        self.assertTrue('a' in s.members)
         s.sadd('b')
         self.assertEqual(2, s.scard())
-        self.assert_(s.sismember('a'))
+        self.assertTrue(s.sismember('a'))
         self.client.sadd('other_set', 'a')
         self.client.sadd('other_set', 'b')
         self.client.sadd('other_set', 'c')
-        self.assert_(s.srandmember() in set(['a', 'b']))
+        self.assertTrue(s.srandmember() in set(['a', 'b']))
 
     def test_sinter(self):
         abc = cont.Set("abc")
@@ -293,7 +293,7 @@ class ListTestCase(unittest.TestCase):
     def test_pop_onto(self):
         a = cont.List('alpha')
         b = cont.List('beta')
-        a.extend(range(10))
+        a.extend(list(range(10)))
 
         # test pop_onto
         a_snap = list(a.members)
@@ -345,25 +345,25 @@ class TypedListTestCase(unittest.TestCase):
         self.client.flushdb()
 
     def test_basic_types(self):
-        alpha = cont.TypedList('alpha', unicode, type_args=('UTF-8',))
-        monies = u'\u0024\u00a2\u00a3\u00a5'
+        alpha = cont.TypedList('alpha', str, type_args=('UTF-8',))
+        monies = '\u0024\u00a2\u00a3\u00a5'
         alpha.append(monies)
         val = alpha[-1]
-        self.assertEquals(monies, val)
+        self.assertEqual(monies, val)
 
         beta = cont.TypedList('beta', int)
-        for i in xrange(1000):
+        for i in range(1000):
             beta.append(i)
         for i, x in enumerate(beta):
-            self.assertEquals(i, x)
+            self.assertEqual(i, x)
 
         charlie = cont.TypedList('charlie', float)
-        for i in xrange(100):
+        for i in range(100):
             val = 1 * pow(10, i*-1)
             charlie.append(val)
         for i, x in enumerate(charlie):
             val = 1 * pow(10, i*-1)
-            self.assertEquals(x, val)
+            self.assertEqual(x, val)
 
     def test_model_type(self):
         from redisco import models
@@ -379,7 +379,7 @@ class TypedListTestCase(unittest.TestCase):
 
         for person in l:
             if person.name == 'clayg':
-                self.assertEquals(iamteam, clayg.friend)
+                self.assertEqual(iamteam, clayg.friend)
             else:
                 # this if failing for some reason ???
                 #self.assertEquals(person.friend, clayg)
@@ -448,14 +448,14 @@ class HashTestCase(unittest.TestCase):
         self.assertEqual({'name': "Richard Cypher",
             'real_name': "Richard Rahl"}, h.dict)
 
-        self.assertEqual(['name', 'real_name'], h.keys())
+        self.assertEqual(['name', 'real_name'], list(h.keys()))
         self.assertEqual(["Richard Cypher", "Richard Rahl"],
-            h.values())
+            list(h.values()))
 
         del h['name']
         pulled = self.client.hgetall('hkey')
         self.assertEqual({'real_name': "Richard Rahl"}, pulled)
-        self.assert_('real_name' in h)
+        self.assertTrue('real_name' in h)
         h.dict = {"new_hash": "YEY"}
         self.assertEqual({"new_hash": "YEY"}, h.dict)
 

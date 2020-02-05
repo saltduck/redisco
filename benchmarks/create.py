@@ -16,7 +16,7 @@ def find_events():
 
 
 def display_results(results, name):
-    print "%s: 5000 Loops, best of 3: %.02f sec" % (name, min(results))
+    print("%s: 5000 Loops, best of 3: %.02f sec" % (name, min(results)))
 
 def profile():
     import cProfile

@@ -264,9 +264,9 @@ class Set(Container):
         >>> s3.clear()
 
         """
-        if not isinstance(key, str) and not isinstance(key, unicode):
+        if not isinstance(key, str) and not isinstance(key, str):
             raise ValueError("Expect a (unicode) string as key")
-        key = unicode(key)
+        key = str(key)
 
         self.db.sunionstore(key, [self.key] + [o.key for o in other_sets])
         return Set(key)
@@ -296,9 +296,9 @@ class Set(Container):
         """
 
 
-        if not isinstance(key, str) and not isinstance(key, unicode):
+        if not isinstance(key, str) and not isinstance(key, str):
             raise ValueError("Expect a (unicode) string as key")
-        key = unicode(key)
+        key = str(key)
 
         self.db.sinterstore(key, [self.key] + [o.key for o in other_sets])
         return Set(key)
@@ -327,9 +327,9 @@ class Set(Container):
         >>> s3.clear()
         """
 
-        if not isinstance(key, str) and not isinstance(key, unicode):
+        if not isinstance(key, str) and not isinstance(key, str):
             raise ValueError("Expect a (unicode) string as key")
-        key = unicode(key)
+        key = str(key)
 
         self.db.sdiffstore(key, [self.key] + [o.key for o in other_sets])
         return Set(key)
@@ -709,13 +709,13 @@ class TypedList(object):
         self.klass = self.value_type(target_type)
         self._klass_args = type_args
         self._klass_kwargs = type_kwargs
-        from models.base import Model
+        from .models.base import Model
         self._redisco_model = issubclass(self.klass, Model)
 
     def value_type(self, target_type):
-        if isinstance(target_type, basestring):
+        if isinstance(target_type, str):
             t = target_type
-            from models.base import get_model_from_key
+            from .models.base import get_model_from_key
             target_type = get_model_from_key(target_type)
             if target_type is None:
                 raise ValueError("Unknown Redisco class %s" % t)
@@ -729,7 +729,7 @@ class TypedList(object):
 
     def typecast_iter(self, values):
         if self._redisco_model:
-            return filter(lambda o: o is not None, [self.klass.objects.get_by_id(v) for v in values])
+            return [o for o in [self.klass.objects.get_by_id(v) for v in values] if o is not None]
         else:
             return [self.klass(v, *self._klass_args, **self._klass_kwargs) for v in values]
 
@@ -757,13 +757,13 @@ class TypedList(object):
         self.list.append(self.typecast_stor(value))
 
     def extend(self, iter):
-        self.list.extend(map(lambda i: self.typecast_stor(i), iter))
+        self.list.extend([self.typecast_stor(i) for i in iter])
 
     def __setitem__(self, index, value):
         self.list[index] = self.typecast_stor(value)
 
     def __iter__(self):
-        for i in xrange(len(self.list)):
+        for i in range(len(self.list)):
             yield self[i]
 
     def __repr__(self):
@@ -934,7 +934,7 @@ class SortedSet(Container):
         if not isinstance(members, dict):
             _members = [members, score]
         else:
-            for member, score in members.items():
+            for member, score in list(members.items()):
                 _members += [member, score]
 
         return self.db.zadd(self.key, *_members)
