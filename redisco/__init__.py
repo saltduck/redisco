@@ -5,6 +5,7 @@ try:
 except ImportError:
     import redis
     default_connection_settings = {
+        'decode_responses': True,
         'host': 'localhost',
         'port': 6379,
         'db': 0
